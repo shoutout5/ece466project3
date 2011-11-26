@@ -1,0 +1,12 @@
+LEX = flex
+YACC = bison
+CC  = gcc
+CXX = g++
+LD  = gcc
+
+CFLAGS = 
+LDFLAGS =-lm
+DEFINES = 
+INCLUDE = 
+
+LIBS =
