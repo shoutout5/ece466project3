@@ -75,6 +75,7 @@ struct inst_d {
   int data;
   int endOp;
   int multiEnd;	// probably for the same thing endOp is but added for safety
+  inst_t prev;
   inst_t next;
   int count;
 };
@@ -101,8 +102,9 @@ typedef struct {
     int **flow_arc;
     int **anti_arc;
     int **output_arc;
+    instr_set *use_inst;
+    instr_set *def_inst;
 } ddg_t;
-
 
 typedef struct lr {
     int go_live;
