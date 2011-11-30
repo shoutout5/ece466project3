@@ -76,6 +76,7 @@ struct inst_d {
   int endOp;
   int multiEnd;	// probably for the same thing endOp is but added for safety
   inst_t next;
+  int count;
 };
 
 typedef struct nodeptr {
@@ -89,6 +90,18 @@ typedef struct {
     block **label_list;
     int num_of_labels;
 } block_array;
+
+typedef struct instr_set_d {
+    int instr;
+    struct instr_set_d *next;
+    struct instr_set_d *prev;
+} instr_set;
+
+typedef struct {
+    int **flow_arc;
+    int **anti_arc;
+    int **output_arc;
+} ddg_t;
 
 
 typedef struct lr {

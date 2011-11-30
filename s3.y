@@ -420,7 +420,7 @@ inst      :
 
 %%
 
-
+int count = 0;
 
 int yywrap() {
   static FILE * currentFile = NULL;
@@ -471,6 +471,8 @@ inst_t new_inst(inst_t copy)
 {
   inst_t tmp = (inst_t) malloc( sizeof(*copy) );
   *tmp = *copy;
+  tmp->count = count;
+  count++;
   return tmp;
 }
 

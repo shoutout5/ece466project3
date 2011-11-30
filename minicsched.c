@@ -44,8 +44,9 @@ void c_optimize() {
         size++;
         current=current->next;
     }
-    live_range live;
+    live_range *live;
     block_array cfg;
+    //ddg_t ddg;
     /* file pointer to dump output code */
     FILE *fptr = fopen(outfile, "w");
 
@@ -62,9 +63,10 @@ void c_optimize() {
 
     find_function(); /* remove extra instructions needed for simulation */
     cfg = generate_cfg();
+   // ddg = generate_ddg();
     live=liveness(size);
-    live.reg++;
-    live.reg--;
+    live->dead++;
+    live->dead--;
     cfg.num_of_labels++;
     cfg.num_of_labels--;
     /************************************************************************/
