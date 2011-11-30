@@ -74,7 +74,26 @@ struct inst_d {
   operand ops[3];
   int data;
   int endOp;
+  int multiEnd;	// probably for the same thing endOp is but added for safety
   inst_t next;
 };
 
+typedef struct nodeptr {
+    inst_t instruction;
+    struct nodeptr *left;
+    struct nodeptr *right;
+    char preds[100];
+} block;
+
+typedef struct {
+    block **label_list;
+    int num_of_labels;
+} block_array;
+
+
+typedef struct lr {
+    int go_live;
+    int dead;
+    struct lr *next;
+} live_range;
 #endif
