@@ -10,7 +10,7 @@ extern int yyerror();
 extern int yywrap();
 extern int yyparse();
 extern int cmdlex();
-
+extern int count;
 void c_optimize(void);
 void codegen_entry(FILE *fptr);
 void codegen_exit(FILE *fptr);
@@ -38,15 +38,11 @@ int main(int argc, char **argv) {
 }
 
 void c_optimize() {
-   inst_t current = instList;
-    int size=0;
-    while(current->next != NULL) {
-        size++;
-        current=current->next;
-    }
-    live_range *live;
+    
+    int size=65;
+//    live_range *live;
     block_array cfg;
-    //ddg_t ddg;
+    ddg_t ddg;
     /* file pointer to dump output code */
     FILE *fptr = fopen(outfile, "w");
 
@@ -63,10 +59,11 @@ void c_optimize() {
 
     find_function(); /* remove extra instructions needed for simulation */
     cfg = generate_cfg();
-   // ddg = generate_ddg();
-    live=liveness(size);
-    live->dead++;
-    live->dead--;
+    ddg = generate_ddg();
+    //live=liveness(size);
+    //live->dead++;
+    //live->dead--;
+    instr_set * succ = build_succ_list(size);    
     cfg.num_of_labels++;
     cfg.num_of_labels--;
     /************************************************************************/
