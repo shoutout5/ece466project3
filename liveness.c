@@ -6,8 +6,6 @@
 #include "functions.h"
 
 extern inst_t instList;
-extern block_array cfg;
-extern ddg_t ddg;
 
 instr_set * build_succ_list(int size) {
     int i;
@@ -16,59 +14,72 @@ instr_set * build_succ_list(int size) {
     //allocate memory for the successors list
     instr_set *succ = (instr_set *) malloc(size * sizeof (instr_set));
 
-    do {
-        //if this instruction doesn't change the PC value
-        //add to the successors list
-        if (current->op != OP_BRA && current->op != OP_BR && current->op != OP_JSRR && current->op != OP_JSR && current->op != OP_JMP) {
-            succ[current->count].instr = current->count + 1;
-            succ[current->count].next = NULL;
-            succ[current->count].prev = NULL;
-        } else {
+    while (current->next != NULL) {
+
+        if (current->op == OP_BR) {
+            printf("in br\n");
+            //for all other branches do the same but get all of the
+            //possible labels and add them to the successors list
+             succ[current->count].prev = NULL;
+             tmp = instList;
+            char *name = current->ops[1].label;
+            do {
+                if (tmp->label != NULL && tmp->op != OP_NONE)
+                    if (!strcmp(name, tmp->label))
+                        break;
+                tmp = tmp->next;
+            } while (tmp->next != NULL);
+
+            succ[current->count].instr = tmp->count;
+            printf("yep %d\n",succ[current->count].instr);
+
+
+            instr_set *new = (instr_set *) malloc(50*sizeof (instr_set));
+
+            succ[current->count].next = new;
+            new->prev = &succ[current->count];
+            new->instr = current->next->count;
+            
+        } else if (current->op == OP_BRA || current->op == OP_JMP) {
+            printf("in br all");
+            printf("here");
             //if it does then do some processing and add it to the successors list
             succ[current->count].prev = NULL;
             tmp = instList;
             //if the current operation is a BRA or JMP
-            if (current->op == OP_BRA || current->op == OP_JMP) {
-                succ[current->count].next = NULL;
-                char *name = current->ops[0].label;
-                //go through the instruction list until we find the count of the
-                //instruction we're going to and add it to the successors list
-                do {
-                    if (tmp->label != NULL)
-                        if (!strcmp(name, tmp->label))
-                            break;
-                    tmp = tmp->next;
-                } while (tmp->next != NULL);
-                succ[current->count].instr = tmp->count;
-            } else {
-                //for all other branches do the same but get all of the
-                //possible labels and add them to the successors list
-                char *name = current->ops[1].label;
+            printf("here");
+            succ[current->count].next = NULL;
+            char *name = current->ops[0].label;
+            //printf("name1: %s\n", name);
+            //go through the instruction list until we find the count of the
+            //instruction we're going to and add it to the successors list
+            do {
+                if (tmp->label != NULL && tmp->op != OP_NONE)
+                    if (!strcmp(name, tmp->label)){
+                       break;
+                    }
+                tmp = tmp->next;
+            } while (tmp->next != NULL);
+            succ[current->count].instr = tmp->count;
+        } else {
+            //if this instruction doesn't change the PC value
+            //add to the successors list
+            succ[current->count].instr = current->count + 1;
+            succ[current->count].next = NULL;
+            succ[current->count].prev = NULL;
 
-                do {
-                    if (tmp->label != NULL)
-                        if (!strcmp(name, tmp->label))
-                            break;
-                    tmp = tmp->next;
-                } while (tmp->next != NULL);
-
-                succ[current->count].instr = tmp->count;
-
-                instr_set *new = (instr_set *) malloc(sizeof (instr_set));
-                succ[current->count].next = new;
-                new->prev = &succ[current->count];
-                new->instr = current->next->count;
-
-            }
         }
         printf("line %d: %d\n", current->count, succ[current->count].instr);
         if (current->op == OP_BR)
             printf("2nd option: %d\n", succ[current->count].next->instr);
+        printf("loc = %d\n",current->count);
+        if(current->count == 23)
+            printf("close");
         current = current->next;
-    } while (current->next != NULL);
+    }
 }
 
-live_range* liveness(int size) {
+live_range* liveness(int size, ddg_t *ddg) {
 
     //setup pointers walk through the lists
 
@@ -107,7 +118,7 @@ live_range* liveness(int size) {
     iterations = 0;
     //we need to run three or four times to verify we have all of the items
     while (iterations < 4) {
-        calculate_liveness(size, iterations, succ, livein, liveout);
+        calculate_liveness(size, iterations, ddg, succ, livein, liveout);
     }
 
     //use the livein and liveout information to build a structure
@@ -117,13 +128,13 @@ live_range* liveness(int size) {
     return live;
 }
 
-void calculate_liveness(int size, int iterations, instr_set * succ, instr_set *livein, instr_set *liveout) {
+void calculate_liveness(int size, int iterations, ddg_t *ddg, instr_set * succ, instr_set *livein, instr_set *liveout) {
 
     instr_set *ddg_follow;
     instr_set *livein_follow;
     instr_set *liveout_follow;
     instr_set * succ_follow;
-    int i,loc;
+    int i, loc;
     //calculate livein and liveout by iterating backwards through the list
     for (i = size; i > 3; i--) {
 
@@ -135,13 +146,13 @@ void calculate_liveness(int size, int iterations, instr_set * succ, instr_set *l
             liveout[i].next = NULL;
             liveout[i].instr = -1;
             //if there is a register used here
-            if (ddg.use_inst[i].instr != -1) {
-                livein[i].instr = ddg.use_inst[i].instr;
+            if (ddg->use_inst[i].instr != 0) {
+                livein[i].instr = ddg->use_inst[i].instr;
                 livein_follow[i].prev = NULL;
                 livein_follow[i].next = NULL;
                 //if no registers are used
             } else {
-                instr_set *ddg_follow = ddg.use_inst;
+                instr_set *ddg_follow = ddg->use_inst;
 
                 while (ddg_follow[i].next != NULL) {
                     instr_set *new = (instr_set *) malloc(sizeof (instr_set));
@@ -185,7 +196,7 @@ void calculate_liveness(int size, int iterations, instr_set * succ, instr_set *l
             int loc = succ[i].instr;
             livein_follow = livein;
             liveout_follow = liveout;
-            ddg_follow = &ddg.use_inst[i];
+            ddg_follow = &ddg->use_inst[i];
             livein[i].instr = -1;
             //make the use part of live in
             do {
@@ -218,9 +229,9 @@ void calculate_liveness(int size, int iterations, instr_set * succ, instr_set *l
             if (liveout[i].instr != -1) {
                 do {
                     //if the liveout is in the definition don't include it
-                    if (liveout_follow[i].instr != ddg.def_inst[i].instr) 
-                        if (!search_ll(liveout_follow[i].instr, livein[i])) 
-                            if (ddg.use_inst->instr != -1) {
+                    if (liveout_follow[i].instr != ddg->def_inst[i].instr)
+                        if (!search_ll(liveout_follow[i].instr, livein[i]))
+                            if (ddg->use_inst->instr != -1) {
                                 instr_set * new = (instr_set *) malloc(sizeof (instr_set));
                                 new->instr = liveout_follow[i].instr;
                                 new->prev = &livein_follow[i];
@@ -228,10 +239,10 @@ void calculate_liveness(int size, int iterations, instr_set * succ, instr_set *l
                                 livein_follow[i].next = new;
                                 livein_follow[i] = *livein_follow[i].next;
                             } else {
-                                
-                        } 
+                                printf("here i am");
+                            }
 
-                     if (liveout_follow[i].next != NULL)
+                    if (liveout_follow[i].next != NULL)
                         liveout_follow[i] = *liveout_follow[i].next;
                     //if there are more to add then add them
                 } while (liveout_follow[i].next != NULL);

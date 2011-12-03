@@ -39,8 +39,8 @@ int main(int argc, char **argv) {
 
 void c_optimize() {
     
-    int size=65;
-//    live_range *live;
+    int size=count;
+    live_range *live;
     block_array cfg;
     ddg_t ddg;
     /* file pointer to dump output code */
@@ -60,10 +60,13 @@ void c_optimize() {
     find_function(); /* remove extra instructions needed for simulation */
     cfg = generate_cfg();
     ddg = generate_ddg();
-    //live=liveness(size);
+    inst_t list;
+    for (list = instList; list->op != OP_RET; list=list->next);
+    count = list->count + 1;
     //live->dead++;
     //live->dead--;
-    instr_set * succ = build_succ_list(size);    
+    printf("count = %d\n",count);
+    live=liveness(size,&ddg);
     cfg.num_of_labels++;
     cfg.num_of_labels--;
     /************************************************************************/
