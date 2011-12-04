@@ -6,11 +6,12 @@
 live_range* liveness(int size, ddg_t *ddg);
 block_array generate_cfg();
 ddg_t generate_ddg();
-
+ud generate_def(int size);
+ud generate_use(int size);
 
 //register allocation
 instr_set * build_succ_list(int size);
-void calculate_liveness(int size, int iterations, int num_of_regs,ddg_t *ddg, instr_set * succ, instr_set *livein, instr_set *liveout);
+void calculate_liveness(int size, int iterations, instr_set * succ, instr_set *livein, instr_set *liveout);
 instr_set *search_array_ll(int val, int size, instr_set *head);
 int search_ll(int val, instr_set *head);
 void calc_range(int size,int num_of_regs,instr_set *livein,instr_set *liveout, live_range *live);
@@ -31,6 +32,7 @@ void sort_by_depth(inst_t *inst_list);
 
 //test benches
 void exercise_ddg();
+void exercise_liveness();
 
 #endif	/* FUNCTIONS_H */
 

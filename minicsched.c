@@ -95,9 +95,9 @@ live_range *live;
     previous_type = -1;
     cfg = generate_cfg();
     ddg = generate_ddg();
-    exercise_ddg();
-    live = liveness(count, &ddg);
-    intGraph = calcInterference(live, 100);
+    exercise_liveness();
+    //live = liveness(count, &ddg);
+    //intGraph = calcInterference(live, 100);
         regAlloc(intGraph, 100, 3, instList);
     for (min_index = 0; inst_list[min_index] == NULL; min_index++);
     while (min_index < count) {

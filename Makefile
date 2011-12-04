@@ -1,7 +1,7 @@
 
 .PHONY: all tests
 
-OBJS :=  minicsched.o s3.y.o s3.lex.o generate_cfg.o liveness.o generate_ddg.o calc_depth.o regAlloc.o coloring.o interference.o cycle_schedule.o ddg_tb.o
+OBJS :=  minicsched.o s3.y.o s3.lex.o generate_cfg.o liveness.o generate_ddg.o calc_depth.o regAlloc.o coloring.o interference.o cycle_schedule.o ddg_tb.o liveness_tb.o
 
 all: sched
 
@@ -40,6 +40,7 @@ cycle_schedule.o:cycle_schedule.c
 
 #test benches
 ddg_tb.o:ddg_tb.c
+liveness_tb.o:liveness_tb.c
 
 include Make.defs
 include Make.rules
