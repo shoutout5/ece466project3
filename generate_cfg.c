@@ -85,11 +85,11 @@ block_array generate_cfg() {
         else
             present->left = cfg.label_list[k+1];        // any other instruction
     }
-    int l;
-    puts("CFG:");
+
+    /*puts("CFG:");
     for (l = 0; l < cfg.num_of_labels; l++) {
         printf("label: %s\n", cfg.label_list[l]->instruction->label);
-    }
+    }*/
 
     return cfg;
 }

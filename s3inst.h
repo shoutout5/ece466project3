@@ -78,6 +78,7 @@ struct inst_d {
   inst_t prev;
   inst_t next;
   int count;
+  int depth;
 };
 
 typedef struct nodeptr {
@@ -102,13 +103,23 @@ typedef struct {
     int **flow_arc;
     int **anti_arc;
     int **output_arc;
+    int *def_inst;
+    instr_set *def_inst_all;
     instr_set *use_inst;
-    instr_set *def_inst;
+    int *ready_cycle;
+    int *schedule_time;
 } ddg_t;
+
 
 typedef struct lr {
     int go_live;
     int dead;
     struct lr *next;
 } live_range;
+
+typedef struct in {
+	int* interferences;
+	int degree;
+	int valid;
+} intNode;
 #endif
